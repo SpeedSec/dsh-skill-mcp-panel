@@ -67,6 +67,7 @@ function validRules(config: Config | undefined): ModeRule[] {
 export function apply(ctx: any, config?: Config): void {
   const rules = validRules(config);
   const restrictions = new Map<any, () => void>();
+  let stopping = false;
   let reconciling = false;
 
   const managedNames = () => {
@@ -75,6 +76,7 @@ export function apply(ctx: any, config?: Config): void {
   };
 
   const reconcile = (agent: any) => {
+    if (stopping) return;
     restrictions.get(agent)?.();
     restrictions.delete(agent);
     const target = selectedTarget(ctx, agent);
@@ -84,7 +86,7 @@ export function apply(ctx: any, config?: Config): void {
   };
 
   const reconcileAll = () => {
-    if (reconciling) return;
+    if (stopping || reconciling) return;
     reconciling = true;
     try {
       for (const agent of ctx.agents.list()) reconcile(agent);
@@ -119,7 +121,9 @@ export function apply(ctx: any, config?: Config): void {
   });
   reconcileAll();
   ctx.effect(() => () => {
-    for (const dispose of restrictions.values()) dispose();
+    stopping = true;
+    const disposers = [...restrictions.values()];
     restrictions.clear();
+    for (const dispose of disposers) dispose();
   }, "skill-mcp-mode-policy.restrictions");
 }

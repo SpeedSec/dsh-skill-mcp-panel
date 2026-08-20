@@ -58,5 +58,28 @@ assert.equal(restrictions.length, 1);
 listeners.get("agent-preset/selected")("session-1", "security-research");
 assert.deepEqual(restrictions.at(-1), { deny: ["mcp__playwright__browser_navigate"] });
 
-console.log("8 passed, 0 failed");
+let reentrantDisposals = 0;
+const reentrantListeners = new Map();
+const reentrantEffects = [];
+const reentrantAgent = {
+  session: { id: "session-2", header: {} },
+  ctx: { tools: { restrict: () => () => {
+    reentrantDisposals += 1;
+    reentrantListeners.get("tools/change")?.();
+  } } },
+};
+apply({
+  agentPresets: { composedPreset: () => "standard" },
+  agents: { list: () => [reentrantAgent] },
+  tools: {
+    schemas: () => [{ name: "mcp__playwright__browser_navigate" }],
+    guard: () => {},
+  },
+  on: (event, listener) => reentrantListeners.set(event, listener),
+  effect: (callback) => reentrantEffects.push(callback()),
+}, { rules: [{ kind: "mcp", name: "playwright", modes: ["security-research"] }] });
+reentrantEffects[0]();
+assert.equal(reentrantDisposals, 1);
+
+console.log("9 passed, 0 failed");
 console.log("ALL MODE POLICY TESTS PASSED");
