@@ -59,7 +59,7 @@ try {
 
   const version = run(["--version"]);
   assert.equal(version.status, 0, version.stderr);
-  assert.match(version.stdout, /dsh-panel v2\.0\.\d+/);
+  assert.match(version.stdout, /dsh-panel v2\.1\.\d+/);
   pass("dsh-panel --version reports package version");
 } finally {
   await rm(dir, { recursive: true, force: true });

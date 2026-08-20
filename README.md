@@ -3,7 +3,7 @@
 [English](README.en.md) | 简体中文
 
 
-DSH 插件，在 Web 设置页同时提供「技能」与「MCP」两个管理面板，并随包提供统一终端命令 `dsh-panel`（`skill` / `mcp` 两个子命令族）。
+DSH 插件，在 Web 设置页提供技能、MCP 与 subprocess 适配工具管理，并随包提供统一终端命令 `dsh-panel`。
 
 注意：本项目提供的参考命令默认指定profile为默认的--profile web，需要更改profile的请自行注意。
 
@@ -44,6 +44,14 @@ DSH 插件，在 Web 设置页同时提供「技能」与「MCP」两个管理�
 - `env` / `headers` 密钥在 RPC 与页面中脱敏，编辑时缺省 key 保留旧值；
 - `cordis.patch.yml` 面板块外的用户内容逐字节保留。
 
+### 工具与模式（v2.1.0）
+
+- 在同一“工具”页人工添加、编辑、启停、删除和快速测试 `@deepseek-ai/dsh-tool-subprocess-adapter` 配置；
+- MCP 与适配工具均可多选 Agent preset；“全部模式”保持原有全局可见行为；
+- 安全研究可单独选择“安全研究执行 Worker”，只进入 Explorer、Experimenter、Challenger 与 Verifier，不进入 Coordinator、Hypothesizer 或 Synthesizer；
+- 模式选择只限制可见性和派发 allowlist，不绕过 DSH 原有权限、sandbox、tool guard、Session Log 或 evidence 规则；
+- 本插件只管理配置。真正的 MCP 连接与 subprocess 工具执行仍由 DSH 官方插件完成。
+
 ## 安装
 
 1. 安装本包（bundle 层自动挂载，无需编辑配置文件）
@@ -67,7 +75,7 @@ DSH 插件，在 Web 设置页同时提供「技能」与「MCP」两个管理�
    dsh-restart
    ```
 
-   重启后刷新页面：设置 → “插件”下方为“技能”，其下方为“MCP”。
+   重启后刷新页面：设置 → “插件”下方为“技能”，其下方为“工具”。
 
 ## 命令行
 

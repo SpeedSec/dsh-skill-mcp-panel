@@ -3,6 +3,7 @@
  */
 import { z } from "zod";
 import { mcpServerInputSchema } from "./model.js";
+import { subprocessToolInputSchema } from "../tool/model.js";
 
 const fiberPhaseSchema = z.enum(["pending", "loading", "active", "failed", "unloading"]).nullable();
 
@@ -29,12 +30,32 @@ export const mcpServerViewSchema = z.object({
   reconnect: reconnectViewSchema,
   managed: z.boolean().default(true),
   fiberPhase: fiberPhaseSchema,
-  toolCount: z.number().int().nonnegative()
+  toolCount: z.number().int().nonnegative(),
+  modes: z.array(z.string()).default(["*"])
+});
+
+const modeViewSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  trust: z.string().optional(),
+  broken: z.string().optional()
+});
+
+const subprocessToolViewSchema = subprocessToolInputSchema.extend({
+  enabled: z.boolean(),
+  entryId: z.string().optional(),
+  managed: z.boolean().default(true),
+  fiberPhase: fiberPhaseSchema,
+  modes: z.array(z.string()).default(["*"])
 });
 
 export const mcpListResultSchema = z.object({
   servers: z.array(mcpServerViewSchema),
   externalServers: z.array(mcpServerViewSchema),
+  tools: z.array(subprocessToolViewSchema),
+  externalTools: z.array(subprocessToolViewSchema),
+  modes: z.array(modeViewSchema),
   patch: z.object({
     path: z.string(),
     ok: z.boolean(),
@@ -45,6 +66,7 @@ export const mcpListResultSchema = z.object({
 export const mcpSavePayloadSchema = z.object({
   input: mcpServerInputSchema,
   previousServerName: z.string().optional(),
+  modes: z.array(z.string()).min(1).default(["*"]),
   enabled: z.boolean().default(true)
 });
 
@@ -79,6 +101,34 @@ const mcpToolSchema = z.object({
 export const mcpTestResultSchema = z.object({
   ok: z.boolean(),
   tools: z.array(mcpToolSchema),
+  error: z.string().optional()
+});
+
+export const toolSavePayloadSchema = z.object({
+  input: subprocessToolInputSchema,
+  previousToolName: z.string().optional(),
+  modes: z.array(z.string()).min(1).default(["*"]),
+  enabled: z.boolean().default(true)
+});
+
+const toolSaveResultSchema = z.object({
+  tool: subprocessToolViewSchema,
+  reconciled: z.boolean()
+});
+
+export const toolRemovePayloadSchema = z.object({ toolName: z.string() });
+export const toolSetEnabledPayloadSchema = z.object({ toolName: z.string(), enabled: z.boolean() });
+export const toolTestPayloadSchema = z.union([
+  z.object({ toolName: z.string(), target: z.string() }),
+  z.object({ input: subprocessToolInputSchema, target: z.string() })
+]);
+
+const toolTestResultSchema = z.object({
+  ok: z.boolean(),
+  target: z.string(),
+  exitCode: z.number().int().nullable(),
+  stdout: z.string(),
+  stderr: z.string(),
   error: z.string().optional()
 });
 
@@ -139,6 +189,42 @@ export const MCP_MANIFEST = {
         { name: "payload", wire: "payload", source: "json", codec: { mode: "strict", typeSymbol: "dsh-skill-mcp-panel#McpTestPayload", schema: mcpTestPayloadSchema } }
       ],
       result: { mode: "strict", typeSymbol: "dsh-skill-mcp-panel#McpTestResult", schema: mcpTestResultSchema }
+    },
+    {
+      id: "dsh-skill-mcp-panel#mcpManager/saveTool",
+      service: "mcpManager",
+      namespace: "mcpManager",
+      method: "saveTool",
+      invocation: { kind: "direct" },
+      parameters: [{ name: "payload", wire: "payload", source: "json", codec: { mode: "strict", typeSymbol: "dsh-skill-mcp-panel#ToolSavePayload", schema: toolSavePayloadSchema } }],
+      result: { mode: "strict", typeSymbol: "dsh-skill-mcp-panel#ToolSaveResult", schema: toolSaveResultSchema }
+    },
+    {
+      id: "dsh-skill-mcp-panel#mcpManager/removeTool",
+      service: "mcpManager",
+      namespace: "mcpManager",
+      method: "removeTool",
+      invocation: { kind: "direct" },
+      parameters: [{ name: "payload", wire: "payload", source: "json", codec: { mode: "strict", typeSymbol: "dsh-skill-mcp-panel#ToolRemovePayload", schema: toolRemovePayloadSchema } }],
+      result: { mode: "strict", typeSymbol: "dsh-skill-mcp-panel#ToolRemoveResult", schema: mcpRemoveResultSchema }
+    },
+    {
+      id: "dsh-skill-mcp-panel#mcpManager/setToolEnabled",
+      service: "mcpManager",
+      namespace: "mcpManager",
+      method: "setToolEnabled",
+      invocation: { kind: "direct" },
+      parameters: [{ name: "payload", wire: "payload", source: "json", codec: { mode: "strict", typeSymbol: "dsh-skill-mcp-panel#ToolSetEnabledPayload", schema: toolSetEnabledPayloadSchema } }],
+      result: { mode: "strict", typeSymbol: "dsh-skill-mcp-panel#ToolSaveResult", schema: toolSaveResultSchema }
+    },
+    {
+      id: "dsh-skill-mcp-panel#mcpManager/testTool",
+      service: "mcpManager",
+      namespace: "mcpManager",
+      method: "testTool",
+      invocation: { kind: "direct" },
+      parameters: [{ name: "payload", wire: "payload", source: "json", codec: { mode: "strict", typeSymbol: "dsh-skill-mcp-panel#ToolTestPayload", schema: toolTestPayloadSchema } }],
+      result: { mode: "strict", typeSymbol: "dsh-skill-mcp-panel#ToolTestResult", schema: toolTestResultSchema }
     },
     {
       id: "dsh-skill-mcp-panel#mcpManager/reload",

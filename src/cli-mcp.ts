@@ -40,8 +40,9 @@ async function readRows(profile: string) {
   const path = profilePatchPath(profile);
   const raw = await readPatchFile(path);
   const managed = extractManagedRows(raw);
+  const managedMcp = managed.filter((row) => row.name === "@deepseek-ai/dsh-mcp-client");
   const external = listMcpPatchRows(raw).filter((row) => typeof row.id === "string" && !managed.some((item) => item.id === row.id));
-  return { path, managed, external };
+  return { path, managed, managedMcp, external };
 }
 
 function usage() {
@@ -181,8 +182,8 @@ export async function runMcpCli(args: string[]): Promise<number> {
 
   if (command === "add") {
     const built = await buildInputFromArgs(args.slice(1));
-    const { managed, external } = await readRows(built.profile);
-    for (const row of [...managed, ...external]) {
+    const { managed, managedMcp, external } = await readRows(built.profile);
+    for (const row of [...managedMcp, ...external]) {
       if (rowServerName(row) === built.input.serverName) throw new Error('serverName "' + built.input.serverName + '" 已存在');
     }
     const row = { id: rowIdForServerName(built.input.serverName), name: "@deepseek-ai/dsh-mcp-client", config: toOfficialConfig(built.input) };
@@ -192,12 +193,12 @@ export async function runMcpCli(args: string[]): Promise<number> {
   }
 
   if (command === "list") {
-    const { managed, external } = await readRows(flags.profile);
-    if (managed.length === 0 && external.length === 0) {
+    const { managedMcp, external } = await readRows(flags.profile);
+    if (managedMcp.length === 0 && external.length === 0) {
       console.log("没有 MCP 服务器。");
       return 0;
     }
-    for (const row of managed) {
+    for (const row of managedMcp) {
       const view = patchRowToView(row);
       if (view !== undefined) console.log(["受管", view.enabled ? "启用" : "停用", view.serverName, view.transport, view.transport === "stdio" ? view.command : view.url].filter(Boolean).join("       "));
     }
@@ -214,9 +215,9 @@ export async function runMcpCli(args: string[]): Promise<number> {
       console.error(command + " 需要一个 serverName 参数");
       return 2;
     }
-    const { managed, external } = await readRows(flags.profile);
+    const { managed, managedMcp, external } = await readRows(flags.profile);
     if (external.some((row) => rowServerName(row) === name)) throw new Error('"' + name + '" 是外部 cordis.patch.yml 行，请手动删除/修改');
-    const row = managed.find((candidate) => rowServerName(candidate) === name);
+    const row = managedMcp.find((candidate) => rowServerName(candidate) === name);
     if (row === undefined) throw new Error('MCP 服务器 "' + name + '" 不存在');
     if (command === "remove") {
       if (!flags.yes) {
@@ -242,8 +243,8 @@ export async function runMcpCli(args: string[]): Promise<number> {
       console.error("test 需要一个 serverName 参数");
       return 2;
     }
-    const { managed, external } = await readRows(flags.profile);
-    const row = [...managed, ...external].find((candidate) => rowServerName(candidate) === name);
+    const { managedMcp, external } = await readRows(flags.profile);
+    const row = [...managedMcp, ...external].find((candidate) => rowServerName(candidate) === name);
     if (row === undefined) throw new Error('MCP 服务器 "' + name + '" 不存在');
     const result = await probeMcpServer(inputFromPatchRow(row));
     if (!result.ok) {

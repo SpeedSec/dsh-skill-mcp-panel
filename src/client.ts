@@ -552,6 +552,42 @@ const css = cssChrome + cssCards + cssAdd + cssScope + cssMigrate + cssGroupDele
 					result: codec("dsh-skill-mcp-panel#McpTestResult")
 				},
 				{
+					id: "dsh-skill-mcp-panel#mcpManager/saveTool",
+					service: "mcpManager",
+					namespace: "mcpManager",
+					method: "saveTool",
+					invocation: { kind: "direct" },
+					parameters: [{ name: "payload", wire: "payload", source: "json", codec: codec("dsh-skill-mcp-panel#ToolSavePayload") }],
+					result: codec("dsh-skill-mcp-panel#ToolSaveResult")
+				},
+				{
+					id: "dsh-skill-mcp-panel#mcpManager/removeTool",
+					service: "mcpManager",
+					namespace: "mcpManager",
+					method: "removeTool",
+					invocation: { kind: "direct" },
+					parameters: [{ name: "payload", wire: "payload", source: "json", codec: codec("dsh-skill-mcp-panel#ToolRemovePayload") }],
+					result: codec("dsh-skill-mcp-panel#ToolRemoveResult")
+				},
+				{
+					id: "dsh-skill-mcp-panel#mcpManager/setToolEnabled",
+					service: "mcpManager",
+					namespace: "mcpManager",
+					method: "setToolEnabled",
+					invocation: { kind: "direct" },
+					parameters: [{ name: "payload", wire: "payload", source: "json", codec: codec("dsh-skill-mcp-panel#ToolSetEnabledPayload") }],
+					result: codec("dsh-skill-mcp-panel#ToolSaveResult")
+				},
+				{
+					id: "dsh-skill-mcp-panel#mcpManager/testTool",
+					service: "mcpManager",
+					namespace: "mcpManager",
+					method: "testTool",
+					invocation: { kind: "direct" },
+					parameters: [{ name: "payload", wire: "payload", source: "json", codec: codec("dsh-skill-mcp-panel#ToolTestPayload") }],
+					result: codec("dsh-skill-mcp-panel#ToolTestResult")
+				},
+				{
 					id: "dsh-skill-mcp-panel#mcpManager/reload",
 					service: "mcpManager",
 					namespace: "mcpManager",
@@ -2067,9 +2103,9 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                 // ── MCP 设置页：字典 / 样式 / 表单 / 卡片 ──────────────────────────
                 const MCP_NS = "settings.mcp";
                 const mcpZh = {
-                        nav: "MCP",
-                        title: "MCP 服务器",
-                        subtitle: "在 profile cordis.patch.yml 的受管块中维护 MCP 服务器，保存后由 DSH HMR 热加载。",
+                        nav: "工具",
+                        title: "MCP 与适配工具",
+                        subtitle: "人工维护 MCP 与 subprocess 适配工具，并选择可见模式；保存后由 DSH HMR 热加载。",
                         add: "+ 添加服务器",
                         refresh: "刷新",
                         empty: "还没有 MCP 服务器。",
@@ -2121,15 +2157,30 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                         stateUnknown: "未知",
                         toolCount: "{count} 个工具",
                         advanced: "高级设置",
+                        fieldModes: "装配到模式",
+                        allModes: "全部模式",
+                        toolsTitle: "适配工具",
+                        addTool: "+ 添加适配工具",
+                        emptyTools: "还没有适配工具。",
+                        newToolTitle: "添加适配工具",
+                        editToolTitle: "编辑适配工具",
+                        fieldToolName: "工具名",
+                        fieldDescription: "说明",
+                        fieldFailureText: "失败标记（每行一个）",
+                        fieldOutputMax: "最大输出字节",
+                        fieldGrace: "终止宽限时间",
+                        testTarget: "测试目标",
+                        testTargetPrompt: "输入传给工具的测试目标",
+                        testExit: "退出码 {code}",
                         currentVersion: "dsh-skill-mcp-panel",
                         checkUpdateAvailable: "发现新版本 v",
                         checkUpdateCurrent: "（当前 v",
                         checkUpdateHint: "）。可在终端运行 dsh-panel update 更新"
                 };
                 const mcpEn = {
-                        nav: "MCP",
-                        title: "MCP Servers",
-                        subtitle: "MCP servers are maintained in the managed block of profile cordis.patch.yml and hot-applied by DSH HMR.",
+                        nav: "Tools",
+                        title: "MCP and adapted tools",
+                        subtitle: "Manage MCP and subprocess-adapted tools, choose their visible modes, and apply changes through DSH HMR.",
                         add: "+ Add server",
                         refresh: "Refresh",
                         empty: "No MCP servers yet.",
@@ -2181,13 +2232,28 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                         stateUnknown: "Unknown",
                         toolCount: "{count} tools",
                         advanced: "Advanced",
+                        fieldModes: "Available in modes",
+                        allModes: "All modes",
+                        toolsTitle: "Adapted tools",
+                        addTool: "+ Add adapted tool",
+                        emptyTools: "No adapted tools yet.",
+                        newToolTitle: "Add adapted tool",
+                        editToolTitle: "Edit adapted tool",
+                        fieldToolName: "Tool name",
+                        fieldDescription: "Description",
+                        fieldFailureText: "Failure markers (one per line)",
+                        fieldOutputMax: "Maximum output bytes",
+                        fieldGrace: "Termination grace period",
+                        testTarget: "Test target",
+                        testTargetPrompt: "Enter a target passed to the tool",
+                        testExit: "Exit code {code}",
                         currentVersion: "dsh-skill-mcp-panel",
                         checkUpdateAvailable: "Update available: v",
                         checkUpdateCurrent: " (current v",
                         checkUpdateHint: "). Run dsh-panel update in a terminal to install it"
                 };
 
-                const cssMcp = ".MCP_section{position:relative;width:100%;max-width:760px;color:var(--dsw-alias-label-primary);display:flex;flex-direction:column;gap:14px}.MCP_head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.MCP_head h3{font-size:14px;font-weight:600;line-height:20px;margin:0}.MCP_sub{color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:18px;margin:0}.MCP_toolbar{display:flex;align-items:center;gap:8px}.MCP_add{font:inherit;color:var(--dsw-alias-state-business-primary);cursor:pointer;background:0 0;border:1px dashed var(--dsw-alias-border-l1);border-radius:8px;padding:7px 16px;font-size:13px;line-height:20px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}.MCP_add:hover{background:var(--dsw-alias-interactive-bg-hover)}.MCP_cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.MCP_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-3);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}.MCP_cardTop{display:flex;align-items:center;gap:8px;min-width:0}.MCP_name{font-size:13px;font-weight:600;line-height:20px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.MCP_badges{display:inline-flex;align-items:center;gap:6px;flex:none}.MCP_badge{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);border-radius:5px;padding:1px 6px;font-size:11px;line-height:16px}.MCP_meta{display:flex;align-items:center;gap:8px;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px}.MCP_dot{width:7px;height:7px;border-radius:999px;background:var(--dsw-alias-label-tertiary);flex:none}.MCP_dot[data-on=true]{background:var(--dsw-alias-state-success-primary)}.MCP_dot[data-err=true]{background:var(--dsw-alias-state-error-primary)}.MCP_actions{display:flex;align-items:center;gap:8px;border-top:1px solid var(--dsw-alias-border-l2);padding-top:8px;flex-wrap:wrap}.MCP_spacer{flex:1}.MCP_form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.MCP_field{display:flex;flex-direction:column;gap:5px}.MCP_field[data-wide=true]{grid-column:1 / -1}.MCP_label{font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary);margin:0}.MCP_input{box-sizing:border-box;width:100%;height:32px;font:inherit;font-size:13px;color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:8px;padding:0 8px}.MCP_input:focus-visible,.MCP_textarea:focus-visible{border-color:var(--dsw-alias-state-business-primary);box-shadow:0 0 0 2px color-mix(in srgb, var(--dsw-alias-state-business-primary) 18%, transparent);outline:none}.MCP_textarea{box-sizing:border-box;width:100%;min-height:64px;font:inherit;font-size:12px;line-height:18px;color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:8px;padding:6px 8px;resize:vertical}.MCP_transportRow{display:flex;gap:8px}.MCP_transportBtn{font:inherit;font-size:13px;line-height:20px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:999px;padding:4px 14px}.MCP_transportBtn[data-active=true]{color:var(--dsw-alias-state-business-primary);border-color:var(--dsw-alias-state-business-primary);background:color-mix(in srgb, var(--dsw-alias-state-business-primary) 12%, transparent)}.MCP_secretKeys{display:flex;flex-wrap:wrap;gap:6px}.MCP_key{display:inline-flex;align-items:center;gap:6px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:999px;padding:2px 8px;font-size:11px;line-height:16px}.MCP_key button{font:inherit;color:var(--dsw-alias-state-error-primary);cursor:pointer;background:0 0;border:none;padding:0}.MCP_checkRow{display:flex;align-items:center;gap:8px;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary)}.MCP_result{border:1px solid var(--dsw-alias-border-l2);border-radius:8px;padding:8px 10px;font-size:12px;line-height:18px;max-height:160px;overflow:auto}.MCP_actionBtn{font:inherit;color:var(--dsw-alias-label-primary);cursor:pointer;background:0 0;border:1px solid var(--dsw-alias-border-l2);border-radius:14px;padding:0 12px;font-size:12px;line-height:26px;height:28px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;box-sizing:border-box}.MCP_actionBtn:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-solid)}.MCP_actionBtn:disabled{cursor:default;opacity:.6}.MCP_dangerBtn{font:inherit;color:var(--dsw-alias-state-error-primary);cursor:pointer;background:0 0;border:1px solid var(--dsw-alias-border-l2);border-radius:14px;padding:0 12px;font-size:12px;line-height:26px;height:28px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;box-sizing:border-box}.MCP_dangerBtn:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-solid)}.MCP_iconBtn{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:1px solid var(--dsw-alias-border-l2);border-radius:6px;padding:0;flex:none}.MCP_iconBtn:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}.MCP_advancedToggle{font:inherit;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:1px dashed var(--dsw-alias-border-l1);border-radius:8px;padding:6px 12px;font-size:13px;line-height:20px}.MCP_advancedToggle:hover{background:var(--dsw-alias-interactive-bg-hover)}.MCP_result[data-ok=true]{border-color:color-mix(in srgb, var(--dsw-alias-state-success-primary) 40%, transparent);background:color-mix(in srgb, var(--dsw-alias-state-success-primary) 8%, transparent)}.MCP_result[data-ok=false]{border-color:color-mix(in srgb, var(--dsw-alias-state-error-primary) 40%, transparent);background:color-mix(in srgb, var(--dsw-alias-state-error-primary) 8%, transparent)}";
+                const cssMcp = ".MCP_section{position:relative;width:100%;max-width:760px;color:var(--dsw-alias-label-primary);display:flex;flex-direction:column;gap:14px}.MCP_head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.MCP_head h3{font-size:14px;font-weight:600;line-height:20px;margin:0}.MCP_sub{color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:18px;margin:0}.MCP_toolbar{display:flex;align-items:center;gap:8px}.MCP_add{font:inherit;color:var(--dsw-alias-state-business-primary);cursor:pointer;background:0 0;border:1px dashed var(--dsw-alias-border-l1);border-radius:8px;padding:7px 16px;font-size:13px;line-height:20px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}.MCP_add:hover{background:var(--dsw-alias-interactive-bg-hover)}.MCP_cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.MCP_card{border:1px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-3);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}.MCP_cardTop{display:flex;align-items:center;gap:8px;min-width:0}.MCP_name{font-size:13px;font-weight:600;line-height:20px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.MCP_badges{display:inline-flex;align-items:center;gap:6px;flex:none;flex-wrap:wrap}.MCP_badge{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);border-radius:5px;padding:1px 6px;font-size:11px;line-height:16px}.MCP_meta{display:flex;align-items:center;gap:8px;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px;min-width:0}.MCP_dot{width:7px;height:7px;border-radius:999px;background:var(--dsw-alias-label-tertiary);flex:none}.MCP_dot[data-on=true]{background:var(--dsw-alias-state-success-primary)}.MCP_dot[data-err=true]{background:var(--dsw-alias-state-error-primary)}.MCP_actions{display:flex;align-items:center;gap:8px;border-top:1px solid var(--dsw-alias-border-l2);padding-top:8px;flex-wrap:wrap}.MCP_spacer{flex:1}.MCP_form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.MCP_field{display:flex;flex-direction:column;gap:5px}.MCP_field[data-wide=true]{grid-column:1 / -1}.MCP_label{font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary);margin:0}.MCP_input{box-sizing:border-box;width:100%;height:32px;font:inherit;font-size:13px;color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:8px;padding:0 8px}.MCP_input:focus-visible,.MCP_textarea:focus-visible{border-color:var(--dsw-alias-state-business-primary);box-shadow:0 0 0 2px color-mix(in srgb, var(--dsw-alias-state-business-primary) 18%, transparent);outline:none}.MCP_textarea{box-sizing:border-box;width:100%;min-height:64px;font:inherit;font-size:12px;line-height:18px;color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:8px;padding:6px 8px;resize:vertical}.MCP_transportRow{display:flex;gap:8px}.MCP_transportBtn{font:inherit;font-size:13px;line-height:20px;color:var(--dsw-alias-label-secondary);cursor:pointer;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:999px;padding:4px 14px}.MCP_transportBtn[data-active=true]{color:var(--dsw-alias-state-business-primary);border-color:var(--dsw-alias-state-business-primary);background:color-mix(in srgb, var(--dsw-alias-state-business-primary) 12%, transparent)}.MCP_secretKeys{display:flex;flex-wrap:wrap;gap:6px}.MCP_key{display:inline-flex;align-items:center;gap:6px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l2);border-radius:999px;padding:2px 8px;font-size:11px;line-height:16px}.MCP_key button{font:inherit;color:var(--dsw-alias-state-error-primary);cursor:pointer;background:0 0;border:none;padding:0}.MCP_checkRow{display:flex;align-items:center;gap:8px;font-size:12px;line-height:18px;color:var(--dsw-alias-label-secondary)}.MCP_modeGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;border:1px solid var(--dsw-alias-border-l2);border-radius:8px;padding:8px}.MCP_modeItem{display:flex;align-items:flex-start;gap:7px;font-size:12px;line-height:17px;color:var(--dsw-alias-label-secondary)}.MCP_modeItem span{display:flex;flex-direction:column}.MCP_modeItem small{color:var(--dsw-alias-label-tertiary)}.MCP_result{border:1px solid var(--dsw-alias-border-l2);border-radius:8px;padding:8px 10px;font-size:12px;line-height:18px;max-height:160px;overflow:auto;white-space:pre-wrap}.MCP_actionBtn{font:inherit;color:var(--dsw-alias-label-primary);cursor:pointer;background:0 0;border:1px solid var(--dsw-alias-border-l2);border-radius:14px;padding:0 12px;font-size:12px;line-height:26px;height:28px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;box-sizing:border-box}.MCP_actionBtn:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-solid)}.MCP_actionBtn:disabled{cursor:default;opacity:.6}.MCP_dangerBtn{font:inherit;color:var(--dsw-alias-state-error-primary);cursor:pointer;background:0 0;border:1px solid var(--dsw-alias-border-l2);border-radius:14px;padding:0 12px;font-size:12px;line-height:26px;height:28px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;box-sizing:border-box}.MCP_dangerBtn:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover-solid)}.MCP_iconBtn{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:1px solid var(--dsw-alias-border-l2);border-radius:6px;padding:0;flex:none}.MCP_iconBtn:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-primary)}.MCP_advancedToggle{font:inherit;color:var(--dsw-alias-label-secondary);cursor:pointer;background:0 0;border:1px dashed var(--dsw-alias-border-l1);border-radius:8px;padding:6px 12px;font-size:13px;line-height:20px}.MCP_advancedToggle:hover{background:var(--dsw-alias-interactive-bg-hover)}.MCP_result[data-ok=true]{border-color:color-mix(in srgb, var(--dsw-alias-state-success-primary) 40%, transparent);background:color-mix(in srgb, var(--dsw-alias-state-success-primary) 8%, transparent)}.MCP_result[data-ok=false]{border-color:color-mix(in srgb, var(--dsw-alias-state-error-primary) 40%, transparent);background:color-mix(in srgb, var(--dsw-alias-state-error-primary) 8%, transparent)}@media(max-width:640px){.MCP_cards,.MCP_form,.MCP_modeGrid{grid-template-columns:1fr}}";
                 const mcpTagId = "dsh-skill-mcp-panel/McpSection.module.css";
                 if (typeof document !== "undefined") {
                         let mcpTag = document.querySelector("style[data-plugin-css=" + JSON.stringify(mcpTagId) + "]") as HTMLElement | null;
@@ -2230,6 +2296,8 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                         dangerBtn: "MCP_dangerBtn",
                         iconBtn: "MCP_iconBtn",
                         advancedToggle: "MCP_advancedToggle"
+                        ,modeGrid: "MCP_modeGrid"
+                        ,modeItem: "MCP_modeItem"
                 };
 
                 function mcpParseLines(text) {
@@ -2261,10 +2329,11 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                                 headersText: "",
                                 timeout: "60000",
                                 failOnStartup: false,
-                                reconnectEnabled: true,
-                                initialDelay: "500",
-                                maxDelay: "30000",
-                                maxAttempts: "10"
+                                 reconnectEnabled: true,
+                                 initialDelay: "500",
+                                 maxDelay: "30000",
+                                 maxAttempts: "10",
+                                 modes: ["*"]
                         };
                 }
                 function formFromServer(server) {
@@ -2280,8 +2349,9 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                         form.reconnectEnabled = server.reconnect?.enabled !== false;
                         form.initialDelay = String(server.reconnect?.initialDelayMs ?? 500);
                         form.maxDelay = String(server.reconnect?.maxDelayMs ?? 30000);
-                        form.maxAttempts = String(server.reconnect?.maxAttempts ?? 10);
-                        return form;
+                         form.maxAttempts = String(server.reconnect?.maxAttempts ?? 10);
+                         form.modes = Array.isArray(server.modes) && server.modes.length > 0 ? server.modes : ["*"];
+                         return form;
                 }
                 function buildMcpInput(form, deletedEnv, deletedHeaders) {
                         const reconnect = {
@@ -2306,7 +2376,30 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                         return { ...common, transport: "stdio", command: String(form.command ?? "").trim(), args: mcpParseLines(form.argsText), env, cwd: String(form.cwd ?? "").trim() };
                 }
 
-                function McpFormDialog({ t, initial, onSave, onCancel, busy, error }) {
+                function ModePicker({ t, modes, selected, onChange }) {
+                        const rows = [{ id: "*", name: t("allModes"), description: "" }, ...(Array.isArray(modes) ? modes : [])];
+                        const toggle = (id, checked) => {
+                                if (id === "*") return onChange(checked ? ["*"] : []);
+                                const current = selected.includes("*") ? [] : selected;
+                                const next = checked ? [...current, id] : current.filter((value) => value !== id);
+                                onChange(next.length > 0 ? next : ["*"]);
+                        };
+                        return (0, react_jsx_runtime.jsx)("div", {
+                                className: m.modeGrid,
+                                children: rows.map((mode) => (0, react_jsx_runtime.jsxs)("label", {
+                                        className: m.modeItem,
+                                        children: [(0, react_jsx_runtime.jsx)("input", {
+                                                type: "checkbox",
+                                                checked: selected.includes(mode.id),
+                                                onChange: (event) => toggle(mode.id, event.target.checked)
+                                        }), (0, react_jsx_runtime.jsxs)("span", {
+                                                children: [(0, react_jsx_runtime.jsx)("strong", { children: mode.name ?? mode.id }), mode.description ? (0, react_jsx_runtime.jsx)("small", { children: mode.description }) : null]
+                                        })]
+                                }, mode.id))
+                        });
+                }
+
+                function McpFormDialog({ t, initial, modes, onSave, onCancel, busy, error }) {
                         const editing = initial !== null && initial !== undefined;
                         const [form, setForm] = react.useState(() => editing ? formFromServer(initial) : defaultMcpForm());
                         const [deletedEnv, setDeletedEnv] = react.useState(() => new Set());
@@ -2316,7 +2409,7 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                         const envKeys = editing && Array.isArray(initial.envKeys) ? initial.envKeys.filter((key) => !deletedEnv.has(key)) : [];
                         const headerKeys = editing && Array.isArray(initial.headerKeys) ? initial.headerKeys.filter((key) => !deletedHeaders.has(key)) : [];
                         const submit = () => {
-                                onSave(buildMcpInput(form, deletedEnv, deletedHeaders), editing ? initial.serverName : undefined);
+                                onSave(buildMcpInput(form, deletedEnv, deletedHeaders), editing ? initial.serverName : undefined, form.modes);
                         };
                         const label = (text) => (0, react_jsx_runtime.jsx)("span", { className: m.label, children: text });
                         const field = (text, node, wide) => (0, react_jsx_runtime.jsxs)("label", {
@@ -2381,15 +2474,16 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                                         ]
                                 }), false)
                         ];
-                        if (form.transport === "stdio") {
+                         if (form.transport === "stdio") {
                                 fields.push(field(t("fieldCommand"), textInput(form.command, (value) => set({ command: value }), ""), true));
                                 fields.push(field(t("fieldArgs"), textArea(form.argsText, (value) => set({ argsText: value }), ""), true));
                                 fields.push(field(t("fieldEnv"), secretEditor(envKeys, deletedEnv, setDeletedEnv, form.envText, (value) => set({ envText: value }), ""), true));
                                 fields.push(field(t("fieldCwd"), textInput(form.cwd, (value) => set({ cwd: value }), ""), false));
-                        } else {
+                         } else {
                                 fields.push(field(t("fieldUrl"), textInput(form.url, (value) => set({ url: value }), ""), true));
                                 fields.push(field(t("fieldHeaders"), secretEditor(headerKeys, deletedHeaders, setDeletedHeaders, form.headersText, (value) => set({ headersText: value }), ""), true));
-                        }
+                         }
+                         fields.push(field(t("fieldModes"), (0, react_jsx_runtime.jsx)(ModePicker, { t, modes, selected: form.modes, onChange: (value) => set({ modes: value }) }), true));
                         fields.push((0, react_jsx_runtime.jsx)("div", {
                                 className: m.field,
                                 "data-wide": "true",
@@ -2468,7 +2562,80 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                                 })
                         });
                 }
-                function McpSection({ t, listMcp, saveMcp, removeMcp, setEnabledMcp, testMcp, reloadMcp, checkUpdateRemote }) {
+                function ToolFormDialog({ t, initial, modes, onSave, onCancel, busy, error }) {
+                        const editing = initial !== null && initial !== undefined;
+                        const [form, setForm] = react.useState(() => editing ? {
+                                toolName: initial.toolName ?? "",
+                                description: initial.description ?? "",
+                                command: initial.command ?? "",
+                                argsText: Array.isArray(initial.args) ? initial.args.join("\n") : "",
+                                failureText: Array.isArray(initial.failureText) ? initial.failureText.join("\n") : "",
+                                timeoutMs: String(initial.timeoutMs ?? 15000),
+                                outputMaxBytes: String(initial.outputMaxBytes ?? 65536),
+                                graceMs: String(initial.graceMs ?? 2000),
+                                modes: Array.isArray(initial.modes) && initial.modes.length > 0 ? initial.modes : ["*"]
+                        } : { toolName: "", description: "", command: "", argsText: "", failureText: "", timeoutMs: "15000", outputMaxBytes: "65536", graceMs: "2000", modes: ["*"] });
+                        const set = (patch) => setForm((prev) => ({ ...prev, ...patch }));
+                        const field = (text, node, wide) => (0, react_jsx_runtime.jsxs)("label", { className: m.field, "data-wide": wide ? "true" : void 0, children: [(0, react_jsx_runtime.jsx)("span", { className: m.label, children: text }), node] });
+                        const input = (value, key) => (0, react_jsx_runtime.jsx)("input", { className: m.input, value, onChange: (event) => set({ [key]: event.target.value }) });
+                        const area = (value, key) => (0, react_jsx_runtime.jsx)("textarea", { className: m.textarea, value, onChange: (event) => set({ [key]: event.target.value }) });
+                        const submit = () => onSave({
+                                toolName: String(form.toolName).trim(),
+                                description: String(form.description).trim(),
+                                command: String(form.command).trim(),
+                                args: mcpParseLines(form.argsText),
+                                failureText: mcpParseLines(form.failureText),
+                                timeoutMs: mcpNumber(form.timeoutMs, 15000),
+                                outputMaxBytes: mcpNumber(form.outputMaxBytes, 65536),
+                                graceMs: mcpNumber(form.graceMs, 2000)
+                        }, editing ? initial.toolName : undefined, form.modes);
+                        return (0, react_jsx_runtime.jsx)("div", { className: c.scopeOverlay, role: "dialog", "aria-modal": "true", children: (0, react_jsx_runtime.jsxs)("div", {
+                                className: c.scopeBox,
+                                children: [(0, react_jsx_runtime.jsx)("h4", { children: editing ? t("editToolTitle") : t("newToolTitle") }), (0, react_jsx_runtime.jsxs)("div", {
+                                        className: m.form,
+                                        children: [field(t("fieldToolName"), input(form.toolName, "toolName"), false), field(t("fieldDescription"), input(form.description, "description"), false), field(t("fieldCommand"), input(form.command, "command"), true), field(t("fieldArgs"), area(form.argsText, "argsText"), true), field(t("fieldFailureText"), area(form.failureText, "failureText"), true), field(t("fieldTimeout"), input(form.timeoutMs, "timeoutMs"), false), field(t("fieldOutputMax"), input(form.outputMaxBytes, "outputMaxBytes"), false), field(t("fieldGrace"), input(form.graceMs, "graceMs"), false), field(t("fieldModes"), (0, react_jsx_runtime.jsx)(ModePicker, { t, modes, selected: form.modes, onChange: (value) => set({ modes: value }) }), true)]
+                                }), error ? (0, react_jsx_runtime.jsx)("div", { className: c.notice, "data-kind": "error", children: (0, react_jsx_runtime.jsx)("span", { className: c.noticeText, children: String(error) }) }) : null, (0, react_jsx_runtime.jsxs)("div", {
+                                        className: c.scopeActions,
+                                        children: [(0, react_jsx_runtime.jsx)("button", { type: "button", className: c.scopeAction + " " + c.scopeCancel, disabled: busy, onClick: onCancel, children: t("cancel") }), (0, react_jsx_runtime.jsx)("button", { type: "button", className: c.scopeAction + " " + c.scopeConfirm, disabled: busy, onClick: submit, children: t("save") })]
+                                })]
+                        }) });
+                }
+
+                function ToolManager({ t, data, refresh, saveTool, removeTool, setToolEnabled, testTool }) {
+                        const [editing, setEditing] = react.useState(null);
+                        const [busy, setBusy] = react.useState(false);
+                        const [error, setError] = react.useState(null);
+                        const [confirming, setConfirming] = react.useState(null);
+                        const [testing, setTesting] = react.useState(null);
+                        const [result, setResult] = react.useState(null);
+                        const tools = data?.tools ?? [];
+                        const external = data?.externalTools ?? [];
+                        const modes = data?.modes ?? [];
+                        const save = async (input, previousToolName, selectedModes) => {
+                                setBusy(true); setError(null);
+                                try { await saveTool(input, previousToolName, selectedModes); setEditing(null); await refresh(); }
+                                catch (failure: any) { setError(String(failure?.message ?? failure)); }
+                                finally { setBusy(false); }
+                        };
+                        const toggle = async (tool) => { try { await setToolEnabled(tool.toolName, !tool.enabled); await refresh(); } catch (failure: any) { setError(String(failure?.message ?? failure)); } };
+                        const remove = async (tool) => {
+                                if (confirming !== tool.toolName) return setConfirming(tool.toolName);
+                                setConfirming(null);
+                                try { await removeTool(tool.toolName); await refresh(); } catch (failure: any) { setError(String(failure?.message ?? failure)); }
+                        };
+                        const test = async (tool) => {
+                                const target = window.prompt(t("testTargetPrompt"), "https://example.com");
+                                if (target === null || target.trim() === "") return;
+                                setTesting(tool.toolName); setResult(null);
+                                try { setResult({ toolName: tool.toolName, value: await testTool(tool.toolName, target.trim()) }); }
+                                catch (failure: any) { setResult({ toolName: tool.toolName, value: { ok: false, error: String(failure?.message ?? failure), stdout: "", stderr: "", exitCode: null } }); }
+                                finally { setTesting(null); }
+                        };
+                        const card = (tool, isExternal) => (0, react_jsx_runtime.jsxs)("div", { className: m.card, children: [(0, react_jsx_runtime.jsxs)("div", { className: m.cardTop, children: [(0, react_jsx_runtime.jsx)("span", { className: m.name, children: tool.toolName }), (0, react_jsx_runtime.jsx)("span", { className: m.badge, children: "SUBPROCESS" }), isExternal ? (0, react_jsx_runtime.jsx)("span", { className: m.badge, children: t("external") }) : null, (0, react_jsx_runtime.jsx)("span", { className: m.spacer }), isExternal ? null : (0, react_jsx_runtime.jsx)("button", { type: "button", className: m.iconBtn, onClick: () => { setError(null); setEditing(tool); }, children: "⚙" })] }), (0, react_jsx_runtime.jsxs)("div", { className: m.meta, children: [(0, react_jsx_runtime.jsx)("span", { className: m.dot, "data-on": tool.enabled ? "true" : "false" }), (0, react_jsx_runtime.jsx)("span", { children: tool.description }), ...(tool.modes ?? []).map((mode) => (0, react_jsx_runtime.jsx)("span", { className: m.badge, children: mode === "*" ? t("allModes") : (modes.find((item) => item.id === mode)?.name ?? mode) }, mode))] }), isExternal ? null : (0, react_jsx_runtime.jsxs)("div", { className: m.actions, children: [(0, react_jsx_runtime.jsx)("button", { type: "button", className: m.actionBtn, onClick: () => toggle(tool), children: tool.enabled ? t("disable") : t("enable") }), (0, react_jsx_runtime.jsx)("span", { className: m.spacer }), (0, react_jsx_runtime.jsx)("button", { type: "button", className: m.actionBtn, disabled: testing === tool.toolName, onClick: () => test(tool), children: testing === tool.toolName ? t("testing") : t("test") }), (0, react_jsx_runtime.jsx)("button", { type: "button", className: confirming === tool.toolName ? m.dangerBtn : m.actionBtn, onClick: () => remove(tool), children: confirming === tool.toolName ? t("confirmDelete") : t("delete") })] }), result?.toolName === tool.toolName ? (0, react_jsx_runtime.jsx)("div", { className: m.result, "data-ok": result.value.ok ? "true" : "false", children: result.value.ok ? t("testExit").replace("{code}", String(result.value.exitCode)) + "\n" + result.value.stdout : t("testFailed") + " " + (result.value.error ?? result.value.stderr ?? "") }) : null] }, tool.toolName + (isExternal ? ":external" : ""));
+                        return (0, react_jsx_runtime.jsxs)(react_jsx_runtime.Fragment, { children: [(0, react_jsx_runtime.jsxs)("div", { className: m.head, children: [(0, react_jsx_runtime.jsx)("h3", { children: t("toolsTitle") }), (0, react_jsx_runtime.jsx)("button", { type: "button", className: m.add, onClick: () => { setError(null); setEditing({}); }, children: t("addTool") })] }), tools.length === 0 && external.length === 0 ? (0, react_jsx_runtime.jsx)("p", { className: m.sub, children: t("emptyTools") }) : null, (0, react_jsx_runtime.jsx)("div", { className: m.cards, children: [...tools.map((tool) => card(tool, false)), ...external.map((tool) => card(tool, true))] }), editing !== null ? (0, react_jsx_runtime.jsx)(ToolFormDialog, { t, initial: editing.toolName ? editing : null, modes, onSave: save, onCancel: () => setEditing(null), busy, error }) : null] });
+                }
+
+                function McpSection({ t, listMcp, saveMcp, removeMcp, setEnabledMcp, testMcp, reloadMcp, saveTool, removeTool, setToolEnabled, testTool, checkUpdateRemote }) {
                         const [loadState, setLoadState] = react.useState({ kind: "loading" } as any);
                         const [data, setData] = react.useState(null);
                         const [request, setRequest] = react.useState(0);
@@ -2510,7 +2677,12 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                         const servers = data?.servers ?? [];
                         const external = data?.externalServers ?? [];
                         const patch = data?.patch ?? {};
-                        const refresh = (quiet) => setRequest((value) => value + 1);
+                        const refresh = async () => {
+                                const value = await reloadMcp();
+                                setData(value);
+                                setLoadState({ kind: "ready" });
+                                return value;
+                        };
                         const stateLabel = (server) => {
                                 if (!server.enabled) return t !== null ? "stateStopped" : "";
                                 const phase = server.fiberPhase;
@@ -2520,13 +2692,13 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                                 if (phase === "pending") return "statePending";
                                 return "stateUnknown";
                         };
-                        const applySave = async (input, previousServerName) => {
+                        const applySave = async (input, previousServerName, modes) => {
                                 setDialogBusy(true);
                                 setDialogError(null);
                                 try {
-                                        const result = await saveMcp(input, previousServerName);
+                                        await saveMcp(input, previousServerName, modes);
                                         setEditing(null);
-                                        setTimeout(() => refresh(true), 500);
+                                        setTimeout(() => { refresh().catch(() => {}); }, 500);
                                 } catch (error: any) {
                                         setDialogError(String(error?.message ?? error));
                                 } finally {
@@ -2604,11 +2776,11 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                                                 })]
                                         }), (0, react_jsx_runtime.jsxs)("div", {
                                                 className: m.meta,
-                                                children: [(0, react_jsx_runtime.jsx)("span", {
+                                                 children: [(0, react_jsx_runtime.jsx)("span", {
                                                         className: m.dot,
                                                         "data-on": server.enabled ? "true" : "false",
                                                         "data-err": server.fiberPhase === "failed" ? "true" : "false"
-                                                }), (0, react_jsx_runtime.jsx)("span", { children: t !== null ? t("toolCount").replace("{count}", String(server.toolCount ?? 0)) : "" })]
+                                                 }), (0, react_jsx_runtime.jsx)("span", { children: t !== null ? t("toolCount").replace("{count}", String(server.toolCount ?? 0)) : "" }), ...(!isExternal ? (server.modes ?? []).map((mode) => (0, react_jsx_runtime.jsx)("span", { className: m.badge, children: mode === "*" ? t("allModes") : (data?.modes?.find((item) => item.id === mode)?.name ?? mode) }, mode)) : [])]
                                         }), isExternal ? null : (0, react_jsx_runtime.jsxs)("div", {
                                                 className: m.actions,
                                                 children: [(0, react_jsx_runtime.jsxs)("span", {
@@ -2665,7 +2837,7 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                                         children: [(0, react_jsx_runtime.jsx)("h3", { children: t !== null ? t("title") : "" }), (0, react_jsx_runtime.jsx)("button", {
                                                 type: "button",
                                                 className: m.actionBtn,
-                                                onClick: () => { reloadMcp().then((value) => { setData(value); }).catch(() => refresh(true)); },
+                                                 onClick: () => { refresh().catch((error) => setLoadState({ kind: "error", message: String(error?.message ?? error) })); },
                                                 children: t !== null ? t("refresh") : ""
                                         })]
                                 }), (0, react_jsx_runtime.jsx)("p", { className: m.sub, children: t !== null ? t("subtitle") : "" }), updateBanner !== null ? (0, react_jsx_runtime.jsxs)("div", {
@@ -2684,7 +2856,7 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                                         children: [(0, react_jsx_runtime.jsx)("span", { className: c.noticeText, children: t !== null ? t("patchBroken") + " " + (patch.error ?? "") : "" }), (0, react_jsx_runtime.jsx)("button", {
                                                 type: "button",
                                                 className: c.noticeButton,
-                                                onClick: () => refresh(true),
+                                                 onClick: () => { refresh().catch(() => {}); },
                                                 children: t !== null ? t("retry") : ""
                                         })]
                                 }) : null, loadState.kind === "error" ? (0, react_jsx_runtime.jsxs)("div", {
@@ -2693,7 +2865,7 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                                         children: [(0, react_jsx_runtime.jsx)("span", { className: c.noticeText, children: loadState.message }), (0, react_jsx_runtime.jsx)("button", {
                                                 type: "button",
                                                 className: c.noticeButton,
-                                                onClick: () => refresh(true),
+                                                 onClick: () => { refresh().catch(() => {}); },
                                                 children: t !== null ? t("retry") : ""
                                         })]
                                 }) : null, (0, react_jsx_runtime.jsx)("div", {
@@ -2707,9 +2879,10 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
                                 }), loadState.kind === "loading" && servers.length === 0 ? (0, react_jsx_runtime.jsx)("p", { className: m.sub, children: t !== null ? t("loading") : "" }) : null, servers.length === 0 && external.length === 0 && loadState.kind === "ready" ? (0, react_jsx_runtime.jsx)("p", { className: m.sub, children: t !== null ? t("empty") : "" }) : null, (0, react_jsx_runtime.jsxs)("div", {
                                         className: m.cards,
                                         children: [...servers.map((server) => serverCard(server, false)), ...external.map((server) => serverCard(server, true))]
-                                }), editing !== null ? (0, react_jsx_runtime.jsx)(McpFormDialog, {
-                                        t: t !== null ? t : (key) => key,
-                                        initial: editing.server,
+                                }), (0, react_jsx_runtime.jsx)(ToolManager, { t: t !== null ? t : (key) => key, data, refresh, saveTool, removeTool, setToolEnabled, testTool }), editing !== null ? (0, react_jsx_runtime.jsx)(McpFormDialog, {
+                                         t: t !== null ? t : (key) => key,
+                                         initial: editing.server,
+                                         modes: data?.modes ?? [],
                                         onSave: applySave,
                                         onCancel: () => setEditing(null),
                                         busy: dialogBusy,
@@ -2769,11 +2942,15 @@ migrator !== null ? (0, react_jsx_runtime.jsx)(MigrateDialog, {
 			});
 			const mcpSectionFace = () => ({
 				listMcp: () => callMcp("list"),
-				saveMcp: (input, previousServerName) => callMcp("save", { input, previousServerName }),
+				saveMcp: (input, previousServerName, modes) => callMcp("save", { input, previousServerName, modes }),
 				removeMcp: (serverName) => callMcp("removeServer", { serverName }),
 				setEnabledMcp: (serverName, enabled) => callMcp("setEnabled", { serverName, enabled }),
 				testMcp: (payload) => callMcp("test", payload),
-				reloadMcp: () => callMcp("reload")
+				reloadMcp: () => callMcp("reload"),
+				saveTool: (input, previousToolName, modes) => callMcp("saveTool", { input, previousToolName, modes }),
+				removeTool: (toolName) => callMcp("removeTool", { toolName }),
+				setToolEnabled: (toolName, enabled) => callMcp("setToolEnabled", { toolName, enabled }),
+				testTool: (toolName, target) => callMcp("testTool", { toolName, target })
 			});
 			// 注册“技能”设置栏（order 16：位于“插件”15 与“agent 预设”20 之间）。
 			ctx.slots.inject("settings.section", () => ctx.slots.register({

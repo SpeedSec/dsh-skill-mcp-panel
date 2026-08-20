@@ -11,7 +11,11 @@ import { parseDocument, stringify } from "yaml";
 export const PANEL_MCP_BLOCK_BEGIN = "# >>> dsh-skill-mcp-panel:mcp:begin";
 export const PANEL_MCP_BLOCK_END = "# <<< dsh-skill-mcp-panel:mcp:end";
 export const MCP_PLUGIN_NAME = "@deepseek-ai/dsh-mcp-client";
+export const SUBPROCESS_ADAPTER_PLUGIN_NAME = "@deepseek-ai/dsh-tool-subprocess-adapter";
+export const MODE_POLICY_PLUGIN_NAME = "dsh-skill-mcp-panel/mode-policy";
+export const MODE_POLICY_ROW_ID = "panel-tool-mode-policy";
 export const MANAGED_ROW_ID_PREFIX = "panel-mcp-";
+export const MANAGED_TOOL_ROW_ID_PREFIX = "panel-tool-";
 
 /** Loader patch 行（宽松形状；受管块只包含 insert 列表）。 */
 export interface PatchRow {
@@ -94,6 +98,15 @@ export function listMcpPatchRows(raw: string): PatchRow[] {
   const parsed = doc.toJS();
   if (!Array.isArray(parsed)) return [];
   return flattenPatchRows(parsed).filter((row) => row.name === MCP_PLUGIN_NAME);
+}
+
+/** 解析整份 patch 并返回其中所有 subprocess adapter 行。 */
+export function listSubprocessAdapterRows(raw: string): PatchRow[] {
+  const doc = parseDocument(raw, { logLevel: "silent" });
+  if (doc.errors.length > 0) return [];
+  const parsed = doc.toJS();
+  if (!Array.isArray(parsed)) return [];
+  return flattenPatchRows(parsed).filter((row) => row.name === SUBPROCESS_ADAPTER_PLUGIN_NAME);
 }
 
 /** 生成受管块文本（无行时为空字符串）。 */

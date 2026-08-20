@@ -2,7 +2,7 @@
 
 English | [简体中文](README.md)
 
-A DSH plugin for managing skills right from the web UI and terminal
+A DSH plugin for managing skills, MCP servers, and subprocess-adapted tools from the Web UI and terminal.
 
 <img width="602" height="599" alt="image" src="https://github.com/user-attachments/assets/23aabaf8-b1fa-43a7-8a9e-ea7c2186917e" />
 
@@ -18,6 +18,9 @@ A DSH plugin for managing skills right from the web UI and terminal
 - **Skill groups** (0.5.0): a second bar below the scope bar (All + group names, horizontally scrollable) filters the list to one group. The “Groups” button (left of the migrate button) opens the group editor: create/rename/delete groups, pick a scope, name the group and batch-check members. Groups live only in the plugin's own display config (`~/.dsh/skills/.system/skill-viewer/groups.json`) — skill directories are never touched.
 
 - **Scope-exact operations** (0.6.4): when the same skill name exists in both the global scope and a workspace, delete, enable/disable and content views act on exactly the (name, scope) row you clicked — each row expands and operates independently, other copies are never touched. Missing entries in the given scope fail loudly instead of falling back. The CLI likewise requires `--global` / `--project` / `--workspace` to disambiguate same-name skills in `enable`/`disable`/`delete`.
+- **MCP and adapted tools** (2.1.0): add, edit, enable, disable, delete, and test official MCP client and subprocess-adapter rows from one Tools page.
+- **Mode targeting**: select one or more agent presets, all modes, or the security-research execution Workers. The latter includes Explorer, Experimenter, Challenger, and Verifier, but excludes Coordinator, Hypothesizer, and Synthesizer.
+- Mode targeting only narrows visibility and research dispatch allowlists. DSH permissions, sandboxing, guards, Session Log evidence, and failure behavior remain authoritative.
 
 ## Install
 
@@ -43,7 +46,7 @@ A DSH plugin for managing skills right from the web UI and terminal
    dsh-restart
    ```
 
-   Then refresh the page: Settings → Skills appears right below Plugins.
+   Then refresh the page: Settings → Skills appears below Plugins, followed by Tools.
 
 ## CLI
 
